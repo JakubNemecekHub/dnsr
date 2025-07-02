@@ -43,25 +43,26 @@ fn main() {
         process::exit(1);
     }
 
-    match udp.send(&data)
+    let sent_size = match udp.send(&data)
     {
         Ok(size) => {
             if *verbose {
                 println!("Sent {} bytes", size);
             }
+            size
         },
         Err(err) => {
             eprintln!("Couldn't send data to DNS server");
             eprintln!("Error: {err}");
             process::exit(1);
         },
-    }
+    };
 
     let mut buf = [0; 256];
     match udp.recv(&mut buf) {
         Ok(size) => {
+            println!("Received {} bytes", size);
             if *verbose {
-                println!("Received {} bytes", size);
                 dnsr::print_header(&buf[..size]);
                 dnsr::print_flags(&buf[..size]);
                 dnsr::print(&buf[..size]);
@@ -72,12 +73,12 @@ fn main() {
             eprintln!("Error: {err}");
             process::exit(1);
         },
-    }
+    };
 
     let rcode = dnsr::get_rcode(&buf);
     if rcode == dnsr::ResponseCode::Ok {
-        let ip = dnsr::get_ip(&buf);
-        println!("{}", ip);
+        let ips = dnsr::get_ips(&buf, sent_size);
+        println!("{:?}", ips);
     } else {
         eprintln!("Received error code");
         eprintln!("RCODE: {:?}", rcode);

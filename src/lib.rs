@@ -157,27 +157,28 @@ fn is_pointer(octet: u8) -> bool {
     octet & MASK == MASK
 }
 
-pub fn get_rdata(payload: &[u8]) -> Vec<u8> {
-    let index = HEADER_LENGTH + question_length(payload);
-    if !is_pointer(payload[index]) {
-        println!("Problem in get_rdata!");
+pub fn get_ips(payload: &[u8], mut index: usize) -> Vec<String> {
+    let ancount = get_ancount(payload);
+    let mut answers: Vec<String> = vec![];
+    for _i in 0..ancount {
+        let (answer, new_index) = get_ip(payload, index);
+        answers.push(answer);
+        index = new_index;
     }
-    const RDLENGTH_OFFSET: usize = 10;  // Offset of the RDLENGTH field within RR if NAME is a pointer
-    let r_data_index = index + RDLENGTH_OFFSET + 2;
-    let r_d_length = get_u16(payload, index + RDLENGTH_OFFSET);
-    let mut result = vec![0; r_d_length as usize];
-    for i in 0..r_d_length as usize {
-        result[i] = payload[r_data_index + i];
-    }
-    result
+    answers
 }
 
-pub fn get_ip(payload: &[u8]) -> String {
-    let data = get_rdata(payload);
-    data.iter()
+fn get_ip(payload: &[u8], index: usize) -> (String, usize) {
+    const RDLENGTH_OFFSET: usize = 10;
+    let r_data_length = get_u16(payload, index + RDLENGTH_OFFSET);
+    let r_data_index = index + RDLENGTH_OFFSET + 2;
+    let answer = payload[r_data_index..(r_data_index + r_data_length as usize)]
+        .iter()
         .map(|x| x.to_string())
         .collect::<Vec<String>>()
-        .join(".")
+        .join(".");
+    let new_index = r_data_index + r_data_length as usize;
+    (answer, new_index)
 }
 
 /// Print color-coded payload in hex.

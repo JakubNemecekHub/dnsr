@@ -221,5 +221,6 @@ The solution is to bind to `0.0.0.0:0` which stands for default or unspecified a
 
 - [ ] Check how to encode domain name ending with ".". See [Root domain on Wikipedia](https://en.wikipedia.org/wiki/Root_name_server#Root_domain).
 - [ ] Finish the [Step 4](https://codingchallenges.fyi/challenges/challenge-dns-resolver/#step-4) of the challenge. Cannot send the UDP packet to the root name server at all.
-- [ ] Probe the number of RRs in a response in a query for "www.seznam.cz". There seem to be two RRs. Query for "www.google.cz" returns ANCOUNT of 1. Query for "rust-lang.org" returns ANCOUNT of 4!
-- [ ] Handle labels in data in the `get_rdata` function. It can only handle a pointer in the NAME field of an RR.
+- [X] Probe the number of RRs in a response in a query for "www.seznam.cz". There seem to be two RRs. Query for "www.google.cz" returns ANCOUNT of 1. Query for "rust-lang.org" returns ANCOUNT of 4!
+- [ ] Handle labels in data in the `get_ip` function. It can only handle a pointer in the NAME field of an RR.
+- [ ] Possibility: create `net::Ipv4Addr` object instead of string?
